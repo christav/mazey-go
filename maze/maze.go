@@ -121,10 +121,10 @@ func (m *Maze) AllCols() [][]Cell {
 }
 
 func (m *Maze) AllCells() []Cell {
-	cells := make([]Cell, m.rows * m.cols)
+	cells := make([]Cell, m.rows*m.cols)
 	for r := 0; r < m.rows; r++ {
 		for c := 0; c < m.cols; c++ {
-			i := r * m.cols + c
+			i := r*m.cols + c
 			cells[i] = Cell{r, c, m}
 		}
 	}
@@ -135,6 +135,15 @@ func (m *Maze) Entrance() Cell {
 	for r := 0; r < m.rows; r++ {
 		if m.CanGo(r, 0, Left) {
 			return m.CellAt(r, 0)
+		}
+	}
+	return Cell{-1, -1, m}
+}
+
+func (m *Maze) Exit() Cell {
+	for r := 0; r < m.rows; r++ {
+		if m.CanGo(r, m.cols-1, Right) {
+			return m.CellAt(r, m.cols-1)
 		}
 	}
 	return Cell{-1, -1, m}
