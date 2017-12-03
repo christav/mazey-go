@@ -30,10 +30,10 @@ var ASCIICharSet = CharSet{
 		'+', '+', '+', '+'},
 
 	solutionChars: [...]string{
-		"   ", "   ", "   ", "XXX",
-		"   ", "XXX", "XXX", "   ",
-		"   ", "XXX", "XXX", "   ",
-		"XXX", "   ", "   ", "   "},
+		"   ", "   ", "   ", " XX",
+		"   ", " X ", " XX", "   ",
+		"   ", "XX ", "XXX", "   ",
+		"XX ", "   ", "   ", "   "},
 }
 
 type printer struct {
@@ -42,15 +42,19 @@ type printer struct {
 	horizontalBar string
 }
 
-func PrintMaze(m *Maze, out io.Writer) {
-	PrintUnicodeMaze(m, out)
+func PrintMaze(m *Maze, printASCII bool, out io.Writer) {
+	if printASCII {
+		printASCIIMaze(m, out)
+	} else {
+		printUnicodeMaze(m, out)
+	}
 }
 
-func PrintUnicodeMaze(m *Maze, out io.Writer) {
+func printUnicodeMaze(m *Maze, out io.Writer) {
 	PrintMazeWithCharSet(m, out, &UnicodeCharSet)
 }
 
-func PrintASCIIMaze(m *Maze, out io.Writer) {
+func printASCIIMaze(m *Maze, out io.Writer) {
 	PrintMazeWithCharSet(m, out, &ASCIICharSet)
 }
 
