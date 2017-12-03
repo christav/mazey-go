@@ -24,7 +24,7 @@ type neighborInDirection struct {
 
 func availableNeighbors(c Cell) []neighborInDirection {
 	neighbors := make([]neighborInDirection, 0, 4)
-	for d := range AllDirections() {
+	for _, d := range AllDirections() {
 		neighbor := c.Go(d)
 		if neighbor.IsInMaze() {
 			neighbors = append(neighbors, neighborInDirection{neighbor, d})

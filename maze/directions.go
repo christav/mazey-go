@@ -10,16 +10,10 @@ const (
 	Right
 )
 
-func AllDirections() <-chan Direction {
-	ch := make(chan Direction)
-	go func() {
-		ch <- Up
-		ch <- Down
-		ch <- Left
-		ch <- Right
-		close(ch)
-	}()
-	return ch
+var allDirs = []Direction{Up, Down, Left, Right}
+
+func AllDirections() []Direction {
+	return allDirs[:]
 }
 
 func ToDyDx(d Direction) (int, int) {

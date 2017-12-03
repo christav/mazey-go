@@ -31,17 +31,14 @@ func (c Cell) OpenDoor(d Direction) {
 	c.m.OpenDoor(c.row, c.col, d)
 }
 
-func (c Cell) Neighbors() <-chan Cell {
-	ch := make(chan Cell)
-	go func() {
-		for d := range AllDirections() {
-			if c.CanGo(d) {
-				ch <- c.Go(d)
-			}
+func (c Cell) Neighbors() []Cell {
+	n := make([]Cell, 0)
+	for _, d := range AllDirections() {
+		if c.CanGo(d) {
+			n = append(n, c.Go(d))
 		}
-		close(ch)
-	}()
-	return ch
+	}
+	return n
 }
 
 func (c Cell) IsInMaze() bool {
@@ -87,74 +84,51 @@ func (m *Maze) CellAt(row, col int) Cell {
 	return Cell{row, col, m}
 }
 
-func (m *Maze) Row(row int) <-chan Cell {
-	ch := make(chan Cell)
-	go func() {
-		if row >= 0 && row < m.rows {
-			for c := 0; c < m.cols; c++ {
-				ch <- Cell{row, c, m}
-			}
-		}
-		close(ch)
-	}()
-	return ch
-}
-
-func (m *Maze) AllRows() <-chan []Cell {
-	ch := make(chan []Cell)
-	go func() {
-		defer close(ch)
-		for r := 0; r < m.rows; r++ {
-			ch <- toSlice(m.Row(r))
-		}
-	}()
-	return ch
-}
-
-func (m *Maze) Col(col int) <-chan Cell {
-	ch := make(chan Cell)
-	go func() {
-		defer close(ch)
-		if col >= 0 && col < m.cols {
-			for r := 0; r < m.rows; r++ {
-				ch <- Cell{r, col, m}
-			}
-		}
-	}()
-	return ch
-}
-
-func (m *Maze) AllCols() <-chan []Cell {
-	ch := make(chan []Cell)
-	go func() {
-		defer close(ch)
+func (m *Maze) Row(row int) []Cell {
+	r := make([]Cell, m.cols)
+	if row >= 0 && row < m.rows {
 		for c := 0; c < m.cols; c++ {
-			ch <- toSlice(m.Col(c))
+			r[c] = Cell{row, c, m}
 		}
-	}()
-	return ch
-}
-
-func (m *Maze) AllCells() <-chan Cell {
-	ch := make(chan Cell)
-	go func() {
-		for r := 0; r < m.rows; r++ {
-			for c := 0; c < m.cols; c++ {
-				ch <- Cell{r, c, m}
-			}
-		}
-		close(ch)
-	}()
-
-	return ch
-}
-
-func toSlice(cells <-chan Cell) []Cell {
-	s := make([]Cell, 0)
-	for c := range cells {
-		s = append(s, c)
 	}
-	return s
+	return r
+}
+
+func (m *Maze) AllRows() [][]Cell {
+	rows := make([][]Cell, m.rows)
+	for r := 0; r < m.rows; r++ {
+		rows[r] = m.Row(r)
+	}
+	return rows
+}
+
+func (m *Maze) Col(col int) []Cell {
+	c := make([]Cell, m.rows)
+	if col >= 0 && col < m.cols {
+		for r := 0; r < m.rows; r++ {
+			c[r] = Cell{r, col, m}
+		}
+	}
+	return c
+}
+
+func (m *Maze) AllCols() [][]Cell {
+	cols := make([][]Cell, m.cols)
+	for c := 0; c < m.cols; c++ {
+		cols[c] = m.Col(c)
+	}
+	return cols
+}
+
+func (m *Maze) AllCells() []Cell {
+	cells := make([]Cell, m.rows * m.cols)
+	for r := 0; r < m.rows; r++ {
+		for c := 0; c < m.cols; c++ {
+			i := r * m.cols + c
+			cells[i] = Cell{r, c, m}
+		}
+	}
+	return cells
 }
 
 func (m *Maze) Entrance() Cell {

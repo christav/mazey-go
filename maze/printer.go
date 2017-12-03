@@ -62,7 +62,7 @@ func PrintMazeWithCharSet(m *Maze, out io.Writer, charSet *CharSet) {
 }
 
 func (p *printer) Print(m *Maze) {
-	for row := range m.AllRows() {
+	for _, row := range m.AllRows() {
 		p.printRowSeparator(row)
 		p.printRow(row)
 	}
@@ -193,7 +193,7 @@ func (p *printer) cellContents(c Cell) string {
 func (p *printer) printMazeBottom(m *Maze) {
 	lastRow := m.Row(m.Rows() - 1)
 	var c Cell
-	for c = range lastRow {
+	for _, c = range lastRow {
 		index := 0xa
 		if !c.CanGo(Left) {
 			index |= 1
