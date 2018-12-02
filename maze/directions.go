@@ -1,21 +1,43 @@
 package maze
 
+// Direction to move in the maze
 type Direction int
 
 const (
+	// None - Direction that is no move
 	None Direction = iota
+	// Up - Move up
 	Up
+	// Down - Move down
 	Down
+	// Left - Move left
 	Left
+	// Right - Move right
 	Right
 )
 
 var allDirs = []Direction{Up, Down, Left, Right}
 
+// AllDirections - Return slice containing all directions to move in the maze except None
 func AllDirections() []Direction {
 	return allDirs[:]
 }
 
+// NextDirection - Given a direction, return the next direction to process
+func NextDirection(d Direction) Direction {
+	switch d {
+	case Up:
+		return Down
+	case Down:
+		return Left
+	case Left:
+		return Right
+	default:
+		return None
+	}
+}
+
+// ToDyDx - Convert a direction to a row, col offset
 func ToDyDx(d Direction) (int, int) {
 	switch d {
 	case None:

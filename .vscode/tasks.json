@@ -6,7 +6,10 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "go build"
+            "command": "go build",
+            "problemMatcher": [
+                "$go"
+            ]
         }
     ]
 }

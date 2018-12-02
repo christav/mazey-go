@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// MakeMaze - Create a maze using recursive backtracking algorithm
 func MakeMaze(rows, cols int) *Maze {
 	rand.Seed(time.Now().Unix())
 	m := NewMaze(rows, cols)
@@ -14,6 +15,7 @@ func MakeMaze(rows, cols int) *Maze {
 
 	m.CellAt(rand.Intn(rows), 0).OpenDoor(Left)
 	m.CellAt(rand.Intn(rows), cols-1).OpenDoor(Right)
+	m.SetAllMarks(0)
 	return m
 }
 

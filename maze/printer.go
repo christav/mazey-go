@@ -5,11 +5,13 @@ import (
 	"io"
 )
 
+// CharSet represents the characters used to print the maze
 type CharSet struct {
 	corners       [16]rune
 	solutionChars [16]string
 }
 
+// UnicodeCharSet is a CharSet using unicode line drawing characters
 var UnicodeCharSet = CharSet{
 	corners: [...]rune{
 		' ', '╹', '╺', '┗', '╻', '┃', '┏', '┣',
@@ -22,6 +24,7 @@ var UnicodeCharSet = CharSet{
 		"┄╮ ", "   ", "   ", "   "},
 }
 
+// ASCIICharSet is a Charset using only basic ASCII characters
 var ASCIICharSet = CharSet{
 	corners: [...]rune{
 		' ', '+', '+', '+',
@@ -42,6 +45,7 @@ type printer struct {
 	horizontalBar string
 }
 
+// PrintMaze prints the maze to the given output using either unicode or ascii charsets
 func PrintMaze(m *Maze, printASCII bool, out io.Writer) {
 	if printASCII {
 		printASCIIMaze(m, out)
@@ -58,23 +62,28 @@ func printASCIIMaze(m *Maze, out io.Writer) {
 	PrintMazeWithCharSet(m, out, &ASCIICharSet)
 }
 
+// PrintMazeWithCharSet prints the maze to the given output using the given CharSet
 func PrintMazeWithCharSet(m *Maze, out io.Writer, charSet *CharSet) {
 	bar := string(charSet.corners[10])
 	horizontalBar := bar + bar + bar
 	p := printer{out, charSet, horizontalBar}
-	p.Print(m)
+	p.print(m)
 }
 
-func (p *printer) Print(m *Maze) {
-	for _, row := range m.AllRows() {
-		p.printRowSeparator(row)
-		p.printRow(row)
+func (p *printer) print(m *Maze) {
+	rowIter := m.AllRows()
+	for r, ok := rowIter.Next(); ok; r, ok = rowIter.Next() {
+		p.printRowSeparator(*r)
+		(*r).Reset()
+		p.printRow(*r)
 	}
 	p.printMazeBottom(m)
 }
 
-func (p *printer) printRowSeparator(row []Cell) {
-	for _, c := range row {
+func (p *printer) printRowSeparator(row CellIterator) {
+	var c Cell
+	var ok bool
+	for c, ok = row.Next(); ok; c, ok = row.Next() {
 		fmt.Fprintf(p.out, "%c", p.cornerChar(c))
 		if c.CanGo(Up) {
 			if IsSolutionCell(c) && IsSolutionCell(c.Go(Up)) {
@@ -86,7 +95,7 @@ func (p *printer) printRowSeparator(row []Cell) {
 			fmt.Fprintf(p.out, p.horizontalBar)
 		}
 	}
-	fmt.Fprintf(p.out, "%c\n", p.rowSeparatorEnd(row))
+	fmt.Fprintf(p.out, "%c\n", p.rowSeparatorEnd(c))
 }
 
 func (p *printer) cornerChar(c Cell) rune {
@@ -116,8 +125,7 @@ func (p *printer) cornerChar(c Cell) rune {
 	return p.charSet.corners[index]
 }
 
-func (p *printer) rowSeparatorEnd(row []Cell) rune {
-	cell := row[len(row)-1]
+func (p *printer) rowSeparatorEnd(cell Cell) rune {
 	upCell := cell.Go(Up)
 	index := 0
 	if !(upCell.IsInMaze() && upCell.IsExit()) {
@@ -137,8 +145,10 @@ func (p *printer) rowSeparatorEnd(row []Cell) rune {
 	return p.charSet.corners[index]
 }
 
-func (p *printer) printRow(row []Cell) {
-	for _, c := range row {
+func (p *printer) printRow(row CellIterator) {
+	var c Cell
+	var ok bool
+	for c, ok = row.Next(); ok; c, ok = row.Next() {
 		if c.IsEntrance() {
 			if IsSolutionCell(c) {
 				fmt.Fprintf(p.out, "%c", []rune(p.charSet.solutionChars[10])[1])
@@ -157,7 +167,7 @@ func (p *printer) printRow(row []Cell) {
 		fmt.Fprintf(p.out, p.cellContents(c))
 	}
 
-	lastCell := row[len(row)-1]
+	lastCell := c
 	if lastCell.IsExit() {
 		if IsSolutionCell(lastCell) {
 			fmt.Fprintf(p.out, "%c", []rune(p.charSet.solutionChars[10])[1])
@@ -197,7 +207,8 @@ func (p *printer) cellContents(c Cell) string {
 func (p *printer) printMazeBottom(m *Maze) {
 	lastRow := m.Row(m.Rows() - 1)
 	var c Cell
-	for _, c = range lastRow {
+	var ok bool
+	for c, ok = lastRow.Next(); ok; c, ok = lastRow.Next() {
 		index := 0xa
 		if !c.CanGo(Left) {
 			index |= 1
